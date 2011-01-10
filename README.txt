@@ -3,7 +3,7 @@ This is a simple SDL impelementation of pong game.
 Some code are taken from from Lazy Foo' SDL tutorial lesson 17 ( http://lazyfoo.net/SDL_tutorials/lesson17/index.php ).
 It has great tutorial about SDL library. Please visit the site if you want to know more about SDL.
 
-This pong game is created as SDL learning purpose & created by hemogoblin( joshua.sendoro@gmail.com ).
+This pong game is created as SDL learning purpose & created by hemogoblin( j-sendoro ).
 
 
 to build the exe file:
