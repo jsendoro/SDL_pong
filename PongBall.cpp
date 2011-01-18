@@ -144,6 +144,12 @@ void PongBall::sidecollision()
 	box.x += getSpeedX();
 }
 
+void PongBall::topdowncollision()
+{
+	myAngle = -1 * myAngle;
+	box.y -= getSpeedY();
+}
+
 SDL_Rect PongBall::getCollisionBox()
 {
 	return box;

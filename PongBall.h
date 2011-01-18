@@ -44,7 +44,7 @@ public:
 	void suspend();
 	void unsuspend();
 	void sidecollision();
-	//void topdowncollision();
+	void topdowncollision();
 	SDL_Rect getCollisionBox();
 };
 

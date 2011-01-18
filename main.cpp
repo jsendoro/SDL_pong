@@ -78,7 +78,7 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination,
 	SDL_BlitSurface( source, clip, destination, &offset );
 }
 
-int check_sidecollision( SDL_Rect A, SDL_Rect B )
+bool check_sidecollision( SDL_Rect A, SDL_Rect B )
 {
 	//The sides of the rectangles
 	int leftA, leftB;
@@ -98,29 +98,64 @@ int check_sidecollision( SDL_Rect A, SDL_Rect B )
 	topB = B.y;
 	bottomB = B.y + B.h;
 	
-	//If any of the sides from A are outside of B
-	if( rightA <= leftB )
-	{
+	if( ( topA < topB && bottomA < bottomB ) || ( topA > topB && bottomA > bottomB ) )
 		return false;
-	}
-
-	if( leftA >= rightB )
+	else
 	{
-		return false;
-	}
+		//If any of the sides from A are outside of B
+		if( rightA <= leftB )
+		{
+			return false;
+		}
 
-	if( bottomA <= topB )
+		if( leftA >= rightB )
+		{
+			return false;
+		}
+
+		//If none of the sides from A are outside B
+		return true;
+	}
+}
+
+bool check_topdowncollision( SDL_Rect A, SDL_Rect B )
+{
+	//The sides of the rectangles
+	int leftA, leftB;
+	int rightA, rightB;
+	int topA, topB;
+	int bottomA, bottomB;
+
+	//Calculate the sides of rect A
+	leftA = A.x;
+	rightA = A.x + A.w;
+	topA = A.y;
+	bottomA = A.y + A.h;
+
+	//Calculate the sides of rect B
+	leftB = B.x;
+	rightB = B.x + B.w;
+	topB = B.y;
+	bottomB = B.y + B.h;
+	
+	if( ( leftA < leftB && rightA < rightB ) || ( leftA > leftB && rightA > rightB ) )
+		return false;
+	else
 	{
-		return false;
-	}
+		//If any of the sides from A are outside of B
+		if( bottomA <= topB )
+		{
+			return false;
+		}
 
-	if( topA >= bottomB )
-	{
-		return false;
-	}
+		if( topA >= bottomB )
+		{
+			return false;
+		}
 
-	//If none of the sides from A are outside B
-	return true;
+		//If none of the sides from A are outside B
+		return true;
+	}
 }
 
 bool init()
@@ -281,12 +316,19 @@ int main( int argc, char* args[] )
 		//Move the ball
 		pball.move();
 
-		//Check if the ball hit the bats 
+		//Check if the ball hit the bats from the sides
 		if( check_sidecollision( pball.getCollisionBox(), lbat.getCollisionBox() ) or 
 				check_sidecollision( pball.getCollisionBox(), rbat.getCollisionBox() ) )
 		{
 			pball.sidecollision();
 		}		
+
+		//Check if the ball hit the bats from top or bottom
+		if( check_topdowncollision( pball.getCollisionBox(), lbat.getCollisionBox() ) or 
+				check_topdowncollision( pball.getCollisionBox(), rbat.getCollisionBox() ) )
+		{
+			pball.topdowncollision();
+		}
 
     //Fill the screen white
     SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0xFF, 0xFF, 0xFF ) );
