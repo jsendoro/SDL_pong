@@ -13,7 +13,7 @@ main.o: main.cpp
 	g++ -c main.cpp
 
 pong: main.o Timer.o PongBat.o PongBall.o
-	g++ main.o Timer.o PongBat.o PongBall.o -o pong -lSDL -lSDL_image
+	g++ main.o Timer.o PongBat.o PongBall.o -o pong -lSDL -lSDL_image -lSDL_ttf
 
 clean:
 	rm -rf *o pong

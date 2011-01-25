@@ -5,16 +5,9 @@
 /* Constructor */
 PongBall::PongBall()
 {
-	myAngle = 30.0;
+	init();
 	mySpeed = 0;
 	myRadius = 5;
-	//Initialize the velocity
-	xVel = 0;
-	yVel = 0;
-	motion = false;
-	//Initialize the offsets
-	box.x = 400;
-	box.y = 250;
 	//Set the square's dimentions
 	box.w = 2 * myRadius;
 	box.h = 2 * myRadius;
@@ -70,7 +63,18 @@ void PongBall::setRadius( int radius )
 {
 	myRadius = radius;
 }
-	
+
+
+bool PongBall::getMotion()
+{
+	return motion;
+}
+
+void PongBall::setMotion( bool move )
+{
+	motion = move;
+}
+
 /* Public functions */
 double PongBall::getDirX()
 {
@@ -107,6 +111,18 @@ bool PongBall::outOfXBound( int minX, int maxX )
 	return( box.x + box.w > maxX || box.x < minX );
 }
 
+void PongBall::init()
+{
+	myAngle = 45.0;
+	//Initialize the velocity
+	xVel = 0;
+	yVel = 0;
+	motion = false;
+	//Initialize the offsets
+	box.x = 320;
+	box.y = 240;
+}
+
 void PongBall::move()
 {
 	/* Logic for deflection */
@@ -118,9 +134,10 @@ void PongBall::move()
 
 	if( outOfXBound( 5,640 ) )
 	{
-		myAngle = ( 180.0 - myAngle );
+		/*myAngle = ( 180.0 - myAngle );
 		if( myAngle > 360.0 )
-			myAngle -= 360.0;
+			myAngle -= 360.0; */
+		init();
 	}
 	box.x += getSpeedX();
 	/* End of logic */

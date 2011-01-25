@@ -6,6 +6,7 @@
 //The headers
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
+#include "SDL/SDL_ttf.h"
 #include <string>
 #include "Timer.h"
 #include "PongBall.h"
@@ -28,10 +29,18 @@ SDL_Surface *ball = NULL;
 SDL_Surface *screen = NULL;
 SDL_Surface *left_bat = NULL;
 SDL_Surface *right_bat = NULL;
+SDL_Surface *left_score = NULL;
+SDL_Surface *right_score = NULL;
 SDL_Surface *pong_board = NULL;
 
 //The event structure
 SDL_Event event;
+
+//The font
+TTF_Font *font = NULL;
+
+//The color of the font
+SDL_Color textColor = { 0x0, 0x0, 0x0 };
 
 SDL_Surface *load_image( std::string filename )
 {
@@ -74,7 +83,6 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination,
 	offset.x = x;
 	offset.y = y;
 
-	//Blit"images/pong_ball24_small.bmp"
 	SDL_BlitSurface( source, clip, destination, &offset );
 }
 
@@ -170,10 +178,10 @@ bool init()
 	screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_SWSURFACE );
 
 	//If there was an error in setting up the screen
-	if( screen == NULL )
-	{
-		return false;
-	}
+	if( screen == NULL ){ return false;	}
+	
+	//Initialize SDL_ttf 
+	if( TTF_Init() == -1 ){ return false; } 
 	
 	//Set the window caption
 	SDL_WM_SetCaption( "My pong", NULL );
@@ -190,24 +198,29 @@ bool load_files()
 	//Load the bat images
 	left_bat = load_image( "images/left_bat24.bmp" );	
 	right_bat = load_image( "images/right_bat24.bmp" );
+	
+	//Open the font 
+	font = TTF_OpenFont( "font/Arena_Black.ttf", 28 ); 
 
 	//If there was a problem in loading the ball
-	if( ball == NULL || left_bat == NULL || right_bat == NULL )
+	if( ball == NULL || left_bat == NULL || right_bat == NULL || font == NULL )
 	{
 		return false;
 	}
-
+	
 	//If everything loaded fine
 	return true;
 }
 
 void clean_up()
 {
-	//Free the surface
+	//Free the surfaceleft_score
 	SDL_FreeSurface( ball );
 	SDL_FreeSurface( left_bat );
 	SDL_FreeSurface( right_bat );
-	//SDL_FreeSurface( pong_board );
+	SDL_FreeSurface( left_score );
+	SDL_FreeSurface( right_score );
+	SDL_FreeSurface( pong_board );
 	
 	//Quit SDL
 	SDL_Quit();
@@ -224,15 +237,18 @@ int main( int argc, char* args[] )
 	bool lbat_movedown = false; //Left bat movement flag  
 	bool rbat_moveup = false; //Right bat movement flag 
 	bool rbat_movedown = false; //Right bat movement flag 
-	//bool side_collision = false //Side collision flag
-	//bool topdown_collision = false //Side collision flag
-
+	
 	//The ball
 	PongBall pball;
 
 	//The bats
 	PongBat lbat( 20, 200, 15, 90, 90.0 );
 	PongBat rbat( 605, 200, 15, 90, 90.0 );
+	
+	//The score
+	int lscore = 0;
+	int rscore = 0;
+	std::string scorestring[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };	
 
 	//The frame rate regulator
 	Timer fps;
@@ -243,12 +259,16 @@ int main( int argc, char* args[] )
 	//Load the files
 	if( load_files() == false ){ return 1; }
 
+	left_score = TTF_RenderText_Solid( font, scorestring[lscore].c_str(), textColor );
+	right_score = TTF_RenderText_Solid( font, scorestring[rscore].c_str(), textColor );
+
 	//While the user hasn't quit
 	while( quit == false )
 	{
 		//Start the frame timer
 		fps.start();
-
+		
+		pause = pball.getMotion();
 		//While there's events to handle
 		while( SDL_PollEvent( &event ) )
 		{
@@ -261,12 +281,12 @@ int main( int argc, char* args[] )
 					if( pause )
 					{
 						pball.unsuspend();
-						pause = false;
+						pball.setMotion( false );
 					}
 					else
 					{
 						pball.suspend();
-						pause = true;
+						pball.setMotion( true );
 					}
 				}
 
@@ -340,6 +360,10 @@ int main( int argc, char* args[] )
 		apply_surface( lbat.getCoordX(), lbat.getCoordY(), left_bat, screen );
 		apply_surface( rbat.getCoordX(), rbat.getCoordY(), right_bat, screen );
 
+		//Show the score on the screen
+		apply_surface( 200, 50, left_score, screen );
+		apply_surface( 420, 50, right_score, screen );
+		 
 		//Update the screen
 		if( SDL_Flip( screen ) == -1 ){ return 1; }
 

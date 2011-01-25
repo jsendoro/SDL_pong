@@ -32,6 +32,8 @@ public:
 	void setSpeed( double speed );
 	int getRadius();
 	void setRadius( int radius );
+	bool getMotion();
+	void setMotion( bool move );
 
 	//Public functions
 	double getDirX();
@@ -40,6 +42,7 @@ public:
 	double getSpeedY();
 	bool outOfYBound( int minY, int maxY );	
 	bool outOfXBound( int minX, int maxX );
+	void init();
 	void move();
 	void suspend();
 	void unsuspend();
