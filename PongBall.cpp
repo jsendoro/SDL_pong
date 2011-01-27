@@ -75,6 +75,16 @@ void PongBall::setMotion( bool move )
 	motion = move;
 }
 
+bool PongBall::getOutRight()
+{
+	return outRight;
+}
+
+bool PongBall::getOutLeft()
+{
+	return outLeft;
+}	
+
 /* Public functions */
 double PongBall::getDirX()
 {
@@ -108,7 +118,24 @@ bool PongBall::outOfYBound( int minY, int maxY )
 
 bool PongBall::outOfXBound( int minX, int maxX )
 {
-	return( box.x + box.w > maxX || box.x < minX );
+	bool rightX = box.x + box.w > maxX;
+	bool leftX = box.x < minX;
+	if( rightX ) 
+	{
+		outRight = true;
+		outLeft = false;
+	}		
+	else if( leftX )
+	{
+		outRight = false;
+		outLeft = true;
+	}
+	else
+	{
+		outRight = false;
+		outLeft = false;
+	}
+	return( rightX || leftX );
 }
 
 void PongBall::init()
@@ -126,20 +153,17 @@ void PongBall::init()
 void PongBall::move()
 {
 	/* Logic for deflection */
+	if( outOfXBound( 5,640 ) )
+	{
+		init();
+	}
+	box.x += getSpeedX();
+
 	if( outOfYBound( 0,480 ) ) 
 	{
 		myAngle = -1 * myAngle;
 	}
 	box.y -= getSpeedY();
-
-	if( outOfXBound( 5,640 ) )
-	{
-		/*myAngle = ( 180.0 - myAngle );
-		if( myAngle > 360.0 )
-			myAngle -= 360.0; */
-		init();
-	}
-	box.x += getSpeedX();
 	/* End of logic */
 }
 

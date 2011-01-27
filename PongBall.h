@@ -16,6 +16,8 @@ private:
 	int xVel;
 	int yVel;
 	bool motion;
+	bool outRight;
+	bool outLeft;
 
 public:
 	//Constructor - Initialize variables
@@ -34,7 +36,9 @@ public:
 	void setRadius( int radius );
 	bool getMotion();
 	void setMotion( bool move );
-
+	bool getOutRight();
+	bool getOutLeft();	
+	
 	//Public functions
 	double getDirX();
 	double getDirY();

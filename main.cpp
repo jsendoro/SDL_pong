@@ -41,6 +41,8 @@ TTF_Font *font = NULL;
 
 //The color of the font
 SDL_Color textColor = { 0x0, 0x0, 0x0 };
+//SDL_Color textColor = { 0xFF, 0xFF, 0xFF }; //Debug
+int temp_posX = 200;
 
 SDL_Surface *load_image( std::string filename )
 {
@@ -232,7 +234,7 @@ int main( int argc, char* args[] )
 	bool quit = false;
 	
 	//Game flag
-	bool pause = true; //Pause flag
+	bool pause; //Pause flag
 	bool lbat_moveup = false; //Left bat movement flag
 	bool lbat_movedown = false; //Left bat movement flag  
 	bool rbat_moveup = false; //Right bat movement flag 
@@ -268,7 +270,7 @@ int main( int argc, char* args[] )
 		//Start the frame timer
 		fps.start();
 		
-		pause = pball.getMotion();
+		pause = !( pball.getMotion() );
 		//While there's events to handle
 		while( SDL_PollEvent( &event ) )
 		{
@@ -332,10 +334,44 @@ int main( int argc, char* args[] )
 			rbat.moveUp();
 		else if( rbat_movedown )
 			rbat.moveDown();			
-		
-		//Move the ball
+	
+		//Movement of the ball
 		pball.move();
-
+		//Adjust the score
+		if( pball.getOutRight() )
+		{
+			if( rscore <= 9 )
+				lscore += 1;
+			if( lscore > 9 )
+			{
+				left_score = TTF_RenderText_Solid( font, "You Win", textColor );
+				right_score = TTF_RenderText_Solid( font, "You Lose", textColor );						
+				//break;
+				//Show the winning message to the screen
+				temp_posX = 150;
+			}
+			else if( rscore <= 9 )
+			{
+				left_score = TTF_RenderText_Solid( font, scorestring[lscore].c_str(), textColor );
+			}
+			pball.setAngle( 135.0 );
+		}
+		if( pball.getOutLeft() )
+		{
+			if( lscore <= 9 )
+				rscore += 1;
+			if( rscore > 9 )
+			{
+				right_score = TTF_RenderText_Solid( font, "You Win", textColor );
+				left_score = TTF_RenderText_Solid( font, "You Lose", textColor );
+				//break;
+				//Show the winning message to the screen
+				temp_posX = 120;
+			}
+			else if( lscore <= 9 )
+				right_score = TTF_RenderText_Solid( font, scorestring[rscore].c_str(), textColor );
+		}		
+		
 		//Check if the ball hit the bats from the sides
 		if( check_sidecollision( pball.getCollisionBox(), lbat.getCollisionBox() ) or 
 				check_sidecollision( pball.getCollisionBox(), rbat.getCollisionBox() ) )
@@ -352,6 +388,7 @@ int main( int argc, char* args[] )
 
     //Fill the screen white
     SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0xFF, 0xFF, 0xFF ) );
+    //SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0x0, 0x0, 0x0 ) ); //Debug
 
 		//Show the ball on the screen
 		apply_surface( pball.getCoordX(), pball.getCoordY(), ball, screen );
@@ -361,17 +398,18 @@ int main( int argc, char* args[] )
 		apply_surface( rbat.getCoordX(), rbat.getCoordY(), right_bat, screen );
 
 		//Show the score on the screen
-		apply_surface( 200, 50, left_score, screen );
+		apply_surface( temp_posX, 50, left_score, screen );	
 		apply_surface( 420, 50, right_score, screen );
-		 
-		//Update the screen
+
+		//Update the screen	
 		if( SDL_Flip( screen ) == -1 ){ return 1; }
 
 		//Cap the frame rate
 		if( fps.get_ticks() < 1000 / FRAMES_PER_SECOND )
 		{
 			SDL_Delay( ( 1000 / FRAMES_PER_SECOND ) - fps.get_ticks() );
-		}
+		}		
+
 	}
 
 	//Clean up
