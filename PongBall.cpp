@@ -6,7 +6,6 @@
 PongBall::PongBall()
 {
 	init();
-	mySpeed = 0;
 	myRadius = 5;
 	//Set the square's dimentions
 	box.w = 2 * myRadius;
@@ -145,6 +144,8 @@ void PongBall::init()
 	xVel = 0;
 	yVel = 0;
 	motion = false;
+	mySpeed = 0;
+
 	//Initialize the offsets
 	box.x = 320;
 	box.y = 240;
@@ -174,7 +175,7 @@ void PongBall::suspend()
 
 void PongBall::unsuspend()
 {
-	mySpeed = 50;
+	mySpeed = 60;
 }
 
 void PongBall::sidecollision()

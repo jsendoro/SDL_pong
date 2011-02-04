@@ -41,6 +41,7 @@ TTF_Font *font = NULL;
 
 //The color of the font
 SDL_Color textColor = { 0x0, 0x0, 0x0 };
+
 //SDL_Color textColor = { 0xFF, 0xFF, 0xFF }; //Debug
 int temp_posX = 200;
 
@@ -228,13 +229,19 @@ void clean_up()
 	SDL_Quit();
 }
 
-int main( int argc, char* args[] )
+int main( int argc, char* argv[] )
 {
+	//Debug flag
+	bool debug;
+	if( argv[1] == "-d" )
+		debug = true;
+	else
+		debug = false;
+
 	//Quit flag
 	bool quit = false;
 	
 	//Game flag
-	bool pause; //Pause flag
 	bool lbat_moveup = false; //Left bat movement flag
 	bool lbat_movedown = false; //Left bat movement flag  
 	bool rbat_moveup = false; //Right bat movement flag 
@@ -260,7 +267,13 @@ int main( int argc, char* args[] )
 
 	//Load the files
 	if( load_files() == false ){ return 1; }
-
+	
+	if( debug )
+	{
+		textColor.r = 0xFF;
+		textColor.g = 0xFF;
+		textColor.b = 0xFF;
+	}
 	left_score = TTF_RenderText_Solid( font, scorestring[lscore].c_str(), textColor );
 	right_score = TTF_RenderText_Solid( font, scorestring[rscore].c_str(), textColor );
 
@@ -270,7 +283,6 @@ int main( int argc, char* args[] )
 		//Start the frame timer
 		fps.start();
 		
-		pause = !( pball.getMotion() );
 		//While there's events to handle
 		while( SDL_PollEvent( &event ) )
 		{
@@ -280,14 +292,14 @@ int main( int argc, char* args[] )
 				//Pause the ball
 				if( event.key.keysym.sym == SDLK_SPACE )
 				{
-					if( pause )
+					if( pball.getMotion() )
 					{
-						pball.unsuspend();
+						pball.suspend();
 						pball.setMotion( false );
 					}
 					else
 					{
-						pball.suspend();
+						pball.unsuspend();
 						pball.setMotion( true );
 					}
 				}
@@ -303,7 +315,7 @@ int main( int argc, char* args[] )
 					rbat_movedown = true;
 			}
 
-			//If a key was pressed
+			//If a key was released
 			if( event.type == SDL_KEYUP )
 			{
 				//Set the flag for bat movement
@@ -325,16 +337,6 @@ int main( int argc, char* args[] )
 			}
 		}
 				
-		//Move the bat
-		if( lbat_moveup )
-			lbat.moveUp();
-		else if( lbat_movedown )
-			lbat.moveDown();
-		if( rbat_moveup )
-			rbat.moveUp();
-		else if( rbat_movedown )
-			rbat.moveDown();			
-	
 		//Movement of the ball
 		pball.move();
 		//Adjust the score
@@ -372,23 +374,45 @@ int main( int argc, char* args[] )
 				right_score = TTF_RenderText_Solid( font, scorestring[rscore].c_str(), textColor );
 		}		
 		
+		//Move the bat
+		if( lbat_moveup )
+			lbat.moveUp();
+		else if( lbat_movedown )
+			lbat.moveDown();
+
+		if( rbat_moveup )
+			rbat.moveUp();
+		else if( rbat_movedown )
+			rbat.moveDown();			
+	
 		//Check if the ball hit the bats from the sides
-		if( check_sidecollision( pball.getCollisionBox(), lbat.getCollisionBox() ) or 
-				check_sidecollision( pball.getCollisionBox(), rbat.getCollisionBox() ) )
+		if( check_sidecollision( pball.getCollisionBox(), lbat.getCollisionBox() ) || check_sidecollision( pball.getCollisionBox(), rbat.getCollisionBox() ) )
 		{
 			pball.sidecollision();
 		}		
 
 		//Check if the ball hit the bats from top or bottom
-		if( check_topdowncollision( pball.getCollisionBox(), lbat.getCollisionBox() ) or 
-				check_topdowncollision( pball.getCollisionBox(), rbat.getCollisionBox() ) )
+		if( check_topdowncollision( pball.getCollisionBox(), lbat.getCollisionBox() ) || check_topdowncollision( pball.getCollisionBox(), rbat.getCollisionBox() ) )
 		{
+			//Undo movement the bat
+			if( lbat_moveup )
+				lbat.moveDown();
+			else if( lbat_movedown )
+				lbat.moveUp();
+
+			if( rbat_moveup )
+				rbat.moveDown();
+			else if( rbat_movedown )
+				rbat.moveUp();			
+
 			pball.topdowncollision();
 		}
 
     //Fill the screen white
-    SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0xFF, 0xFF, 0xFF ) );
-    //SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0x0, 0x0, 0x0 ) ); //Debug
+		//if( debug )
+    	SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0x0, 0x0, 0x0 ) ); //Debug
+		//else
+	    //SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0xFF, 0xFF, 0xFF ) ); //White
 
 		//Show the ball on the screen
 		apply_surface( pball.getCoordX(), pball.getCoordY(), ball, screen );
