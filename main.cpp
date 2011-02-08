@@ -8,6 +8,7 @@
 #include "SDL/SDL_image.h"
 #include "SDL/SDL_ttf.h"
 #include <string>
+#include <iostream>
 #include "Timer.h"
 #include "PongBall.h"
 #include "PongBat.h"
@@ -40,14 +41,14 @@ SDL_Event event;
 TTF_Font *font = NULL;
 
 //The color of the font
-SDL_Color textColor = { 0x0, 0x0, 0x0 };
+SDL_Color textColor = { 0x0, 0x0, 0x0 }; 
 
-//SDL_Color textColor = { 0xFF, 0xFF, 0xFF }; //Debug
 int temp_posX = 200;
 
 SDL_Surface *load_image( std::string filename )
 {
-	//The image that's loaded
+	//The image that's loaded#include <iostream>
+
 	SDL_Surface* loadedImage = NULL;
 
 	//The optimized surface that will be used
@@ -234,10 +235,15 @@ int main( int argc, char* argv[] )
 	//Debug flag
 	bool debug;
 	if( argv[1] == "-d" )
+	{
 		debug = true;
+		std::cout << "debug = true";
+	}
 	else
+	{
 		debug = false;
-
+		std::cout << "debug = false";
+	}
 	//Quit flag
 	bool quit = false;
 	
@@ -388,6 +394,17 @@ int main( int argc, char* argv[] )
 		//Check if the ball hit the bats from the sides
 		if( check_sidecollision( pball.getCollisionBox(), lbat.getCollisionBox() ) || check_sidecollision( pball.getCollisionBox(), rbat.getCollisionBox() ) )
 		{
+			//Undo movement the bat
+			if( lbat_moveup )
+				lbat.moveDown();
+			else if( lbat_movedown )
+				lbat.moveUp();
+
+			if( rbat_moveup )
+				rbat.moveDown();
+			else if( rbat_movedown )
+				rbat.moveUp();			
+
 			pball.sidecollision();
 		}		
 
@@ -404,15 +421,14 @@ int main( int argc, char* argv[] )
 				rbat.moveDown();
 			else if( rbat_movedown )
 				rbat.moveUp();			
-
 			pball.topdowncollision();
 		}
 
     //Fill the screen white
-		//if( debug )
+		if( debug )
     	SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0x0, 0x0, 0x0 ) ); //Debug
-		//else
-	    //SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0xFF, 0xFF, 0xFF ) ); //White
+		else
+	    SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0xFF, 0xFF, 0xFF ) ); //White
 
 		//Show the ball on the screen
 		apply_surface( pball.getCoordX(), pball.getCoordY(), ball, screen );
